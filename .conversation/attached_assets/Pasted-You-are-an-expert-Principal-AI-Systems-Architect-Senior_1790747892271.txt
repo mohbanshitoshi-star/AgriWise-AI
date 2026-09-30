@@ -1,0 +1,290 @@
+You are an expert Principal AI Systems Architect, Senior Full-Stack Software Engineer, and Agricultural Tech Lead. Your mission is to build a complete, production-grade, end-to-end AI-Powered Agriculture Crop Advisory Assistant application named AgriWise AI.This document contains the complete product specification, system architecture, database design, server-side code structure, and AI engine setup. Read all requirements carefully and build the full repository step-by-step.1. Header & System Persona RoleSystem Role: Expert AI Systems Architect & Full-Stack Agricultural Tech Engineer.Target Stack: React.js (Vite), Node.js (Express), Supabase (PostgreSQL + Auth), Gemini AI (@google/genai SDK), Tailwind CSS, and Zod.Execution Standard: Production-ready, zero pseudocode, zero missing files, strictly typed schema validation, secure environment isolated API keys, and bulletproof Row Level Security (RLS).2. Core Mission DirectiveBuild a localized, intelligent agricultural advisory platform that empowers farmers, agronomists, and farm managers to diagnose crop diseases, generate hyper-local field management plans, monitor weather impacts, track soil health, and receive real-time crop growth recommendations. The application must bridge multi-modal AI capabilities with strict database persistence, ensuring offline-first capability, secure authentication, and multi-lingual UI/AI responses.3. Product GoalTo minimize crop yield loss and optimize fertilizer/water usage by providing low-latency, hyper-localized AI advisory services grounded in verified agricultural data, real-time satellite/weather parameters, and user-provided field observations.4. Mandatory FeaturesUser Authentication & Profiles: Role-based access (Farmer, Agronomist, Admin) with location, farm size, and primary crop preferences.AI Visual Diagnostic Engine: Multi-modal plant disease diagnosis via image upload with instant identification, confidence scoring, treatment plans, and preventative measures.Smart Crop Advisory Generator: Dynamic field-level advice based on crop type, growth stage, soil type, N-P-K levels, irrigation source, and local weather forecasts.Interactive Farm Dashboard: Real-time overview of active field logs, weather alerts, pending agricultural tasks, and historical diagnostic reports.Soil Health & Nutrient Calculator: Fertilizer calculation tool translating soil lab tests into exact multi-stage fertilizer dosages (Urea, DAP, MOP, micronutrients).Agronomy Chat Assistant: Real-time conversational interface with streaming AI responses, conversation history, and voice-to-text / text-to-speech support.Multi-Lingual Localization: Instant switching between English, Hindi, Spanish, French, and regional options with AI generating response in the user's active language.Export & Offline Support: PDF report export for advisory logs and disease diagnoses with local storage sync for low-connectivity field usage.5. Technology RequirementsFrontend: React.js (v18+ with Vite), Tailwind CSS, Lucide React (Icons), Recharts (Analytics), Framer Motion (Animations).Backend: Node.js (v20+), Express.js (REST API framework), @google/genai (Official Google Gen AI SDK), zod (Validation), multer (File upload handling), pdfkit or @react-pdf/renderer (PDF generation).Database & Auth: Supabase PostgreSQL with RLS enabled on all tables, Supabase Auth (@supabase/supabase-js).Validation & Security: Helmet, CORS, Rate Limiting (express-rate-limit), Zod strict payload validation, Multer image file sanitization.6. Application Pages (Routes)/login - Auth sign-in / sign-up page (Email/Password, Supabase Auth UI)./ or /dashboard - Main Overview: Active fields, current weather widget, quick diagnostic shortcut, recent advisory feeds./diagnosis - AI Image Diagnostic Tool: File dropzone, camera upload, interactive analysis viewer, history list./advisory/new - Wizard-style multi-step form for generating targeted field advisory./advisory/:id - Detailed Advisory View: Fertilizer plan, irrigation schedule, risk metrics, and PDF export./chat - Agronomy AI Chat Assistant with continuous memory and localized language toggles./soil-calculator - Soil test analyzer and precise nutrient application estimator./profile - User farm profile setup (GPS location, farm size, soil parameters, default crop list).7. User FlowOnboarding: User signs up, completes profile (Location, Farm Size, Soil pH, Primary Crops).Field Diagnosis: User captures/uploads photo of a distressed crop leaf $\rightarrow$ Express backend processes image via Gemini 2.5 Vision $\rightarrow$ Parsed JSON result saved to database $\rightarrow$ Displayed with immediate organic & chemical treatment options.Field Advisory Request: User fills 4-step wizard (Crop, Stage, Soil Metrics, Weather) $\rightarrow$ Backend triggers structured Gemini advisory generation $\rightarrow$ Advisory saved and presented as an actionable checklist.Follow-up Chat: User asks follow-up questions in /chat referencing saved diagnosis/advisory records $\rightarrow$ Contextual AI streams answers in selected language.8. Target Domains & CategorizationCereals & Grains: Wheat, Rice, Maize, Barley, Sorghum.Pulses & Legumes: Chickpea, Pigeon Pea, Lentil, Soybean.Cash Crops: Cotton, Sugarcane, Tea, Coffee.Fruits & Vegetables: Tomato, Potato, Onion, Apple, Citrus, Banana.Soil Categories: Clay, Loamy, Sandy, Alluvial, Black (Regur), Red/Laterite.9. Form & Advisory ConfigurationGrowth Stages: Sowing/Germination, Vegetative, Flowering, Fruiting/Grain Filling, Harvesting.Irrigation Types: Rainfed, Drip Irrigation, Sprinkler, Flood/Furrow.Risk Levels: Low, Moderate, High, Critical.10. Database Schema (Production SQL for PostgreSQL)Execute the following SQL in your Supabase SQL Editor:SQL-- Enable Extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 1. Profiles Table
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    full_name TEXT NOT NULL,
+    phone_number TEXT,
+    preferred_language TEXT DEFAULT 'en',
+    location_name TEXT,
+    latitude NUMERIC(10, 7),
+    longitude NUMERIC(10, 7),
+    farm_size_acres NUMERIC(8, 2),
+    default_soil_type TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Crop Diagnoses Table
+CREATE TABLE public.crop_diagnoses (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    crop_name TEXT NOT NULL,
+    disease_detected TEXT NOT NULL,
+    is_healthy BOOLEAN NOT NULL DEFAULT FALSE,
+    confidence_score NUMERIC(5, 2) NOT NULL,
+    symptoms JSONB NOT NULL DEFAULT '[]'::jsonb,
+    treatment_chemical JSONB NOT NULL DEFAULT '[]'::jsonb,
+    treatment_organic JSONB NOT NULL DEFAULT '[]'::jsonb,
+    prevention_steps JSONB NOT NULL DEFAULT '[]'::jsonb,
+    severity_level TEXT CHECK (severity_level IN ('Low', 'Moderate', 'High', 'Critical')),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Crop Advisories Table
+CREATE TABLE public.crop_advisories (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    crop_name TEXT NOT NULL,
+    growth_stage TEXT NOT NULL,
+    soil_type TEXT NOT NULL,
+    field_area_acres NUMERIC(8, 2) NOT NULL,
+    nitrogen_level NUMERIC(6,2),
+    phosphorus_level NUMERIC(6,2),
+    potassium_level NUMERIC(6,2),
+    ph_level NUMERIC(3,1),
+    irrigation_method TEXT NOT NULL,
+    weather_summary JSONB,
+    fertilizer_schedule JSONB NOT NULL DEFAULT '[]'::jsonb,
+    irrigation_schedule JSONB NOT NULL DEFAULT '[]'::jsonb,
+    pest_warning_level TEXT CHECK (pest_warning_level IN ('Low', 'Moderate', 'High', 'Critical')),
+    recommended_actions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    yield_optimizations JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Chat Sessions Table
+CREATE TABLE public.chat_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    title TEXT NOT NULL DEFAULT 'New Conversation',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 5. Chat Messages Table
+CREATE TABLE public.chat_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID NOT NULL REFERENCES public.chat_sessions(id) ON DELETE CASCADE,
+    sender TEXT NOT NULL CHECK (sender IN ('user', 'assistant')),
+    content TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Trigger for auto-profile creation on signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, full_name, preferred_language)
+    VALUES (
+        NEW.id,
+        COALESCE(NEW.raw_user_meta_data->>'full_name', 'Farmer User'),
+        COALESCE(NEW.raw_user_meta_data->>'preferred_language', 'en')
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+11. Row Level Security (RLS) / Data Isolation RulesSQL-- Enable RLS on all tables
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.crop_diagnoses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.crop_advisories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Profiles Policies
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
+
+-- Crop Diagnoses Policies
+CREATE POLICY "Users can view own diagnoses" ON public.crop_diagnoses FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own diagnoses" ON public.crop_diagnoses FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own diagnoses" ON public.crop_diagnoses FOR DELETE USING (auth.uid() = user_id);
+
+-- Crop Advisories Policies
+CREATE POLICY "Users can view own advisories" ON public.crop_advisories FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own advisories" ON public.crop_advisories FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own advisories" ON public.crop_advisories FOR DELETE USING (auth.uid() = user_id);
+
+-- Chat Sessions Policies
+CREATE POLICY "Users can view own sessions" ON public.chat_sessions FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own sessions" ON public.chat_sessions FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own sessions" ON public.chat_sessions FOR DELETE USING (auth.uid() = user_id);
+
+-- Chat Messages Policies
+CREATE POLICY "Users can view own messages" ON public.chat_messages FOR SELECT USING (
+    EXISTS (SELECT 1 FROM public.chat_sessions WHERE id = chat_messages.session_id AND user_id = auth.uid())
+);
+CREATE POLICY "Users can insert own messages" ON public.chat_messages FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM public.chat_sessions WHERE id = chat_messages.session_id AND user_id = auth.uid())
+);
+12. Backend API RoutesAll endpoints must validate requests via Supabase Auth Bearer Tokens and Zod schemas.POST /api/v1/diagnosis/analyze - Accepts multipart form data (image + metadata). Invokes Gemini Vision. Returns JSON diagnosis & persists to DB.POST /api/v1/advisory/generate - Accepts crop/soil JSON parameters. Invokes Gemini 2.5 Flash with Structured Outputs (responseSchema).POST /api/v1/chat/stream - Accepts chat prompt + sessionId. Streams back response chunks using Server-Sent Events (SSE) or readable stream.POST /api/v1/soil/calculate - Accepts soil test N-P-K & targeted crop. Computes dosage and generates AI amendment guidelines.GET /api/v1/weather/forecast?lat={lat}&lon={lon} - Fetches current/5-day weather and returns agronomic advisory risk flags.13. Gemini SDK Setup & Server-Side SecurityUse the official Google Gen AI SDK (@google/genai). Never expose GEMINI_API_KEY to the client.JavaScript// server/config/gemini.js
+import { GoogleGenAI } from '@google/genai';
+
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY environment variable is required.");
+}
+
+export const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+export const GEMINI_FLASH_MODEL = 'gemini-2.5-flash';
+14. AI System PromptPlaintextYou are AgriWise AI, an elite Agronomist, Botanical Pathologist, and Soil Science Specialist.
+Your purpose is to provide highly precise, practical, context-aware agricultural advice to farmers worldwide.
+
+RULES OF ENGAGEMENT:
+1. ACCURACY & SAFETY: Recommendations for chemical pesticides/fungicides must include clear dosage rates, safety gear warnings, and pre-harvest intervals (PHI). Always prioritize Integrated Pest Management (IPM) and organic alternatives alongside chemical options.
+2. LOCALIZATION: Respond in the exact language requested by the user interface setting. Translate technical terms into accessible farming language.
+3. STRUCTURE: Produce valid JSON adhering strictly to provided JSON schemas when requested.
+4. ACTIONABILITY: Give clear step-by-step instructions (e.g., "Apply 45 kg Urea per acre at 30 days post-sowing during morning hours").
+5. TONE: Empathetic, practical, authoritative yet simple.
+15. Detailed AI Prompts (with required JSON Schemas)A. Image Diagnosis Prompt & SchemaPrompt:Analyze this plant image. Identify the crop, diagnose any disease, pest infestation, or nutrient deficiency. Provide confidence score, symptoms list, chemical treatments, organic treatments, preventative steps, and overall severity level. Output MUST match the structured JSON schema. Preferred language: {{language}}.Schema:JavaScriptimport { Type } from '@google/genai';
+
+export const diagnosisResponseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    crop_name: { type: Type.STRING },
+    disease_detected: { type: Type.STRING },
+    is_healthy: { type: Type.BOOLEAN },
+    confidence_score: { type: Type.NUMBER, description: "Percentage from 0 to 100" },
+    severity_level: { type: Type.STRING, enum: ["Low", "Moderate", "High", "Critical"] },
+    symptoms: { type: Type.ARRAY, items: { type: Type.STRING } },
+    treatment_chemical: { type: Type.ARRAY, items: { type: Type.STRING } },
+    treatment_organic: { type: Type.ARRAY, items: { type: Type.STRING } },
+    prevention_steps: { type: Type.ARRAY, items: { type: Type.STRING } }
+  },
+  required: ["crop_name", "disease_detected", "is_healthy", "confidence_score", "severity_level", "symptoms", "treatment_chemical", "treatment_organic", "prevention_steps"]
+};
+B. Advisory Generation SchemaJavaScriptexport const advisoryResponseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    fertilizer_schedule: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          growth_stage: { type: Type.STRING },
+          fertilizer_name: { type: Type.STRING },
+          dosage_per_acre: { type: Type.STRING },
+          application_method: { type: Type.STRING },
+          timing_notes: { type: Type.STRING }
+        },
+        required: ["growth_stage", "fertilizer_name", "dosage_per_acre", "application_method", "timing_notes"]
+      }
+    },
+    irrigation_schedule: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          stage: { type: Type.STRING },
+          water_frequency_days: { type: Type.STRING },
+          critical_warnings: { type: Type.STRING }
+        },
+        required: ["stage", "water_frequency_days", "critical_warnings"]
+      }
+    },
+    pest_warning_level: { type: Type.STRING, enum: ["Low", "Moderate", "High", "Critical"] },
+    recommended_actions: { type: Type.ARRAY, items: { type: Type.STRING } },
+    yield_optimizations: { type: Type.ARRAY, items: { type: Type.STRING } }
+  },
+  required: ["fertilizer_schedule", "irrigation_schedule", "pest_warning_level", "recommended_actions", "yield_optimizations"]
+};
+16. Zod Validation RequirementsJavaScript// server/validators/advisory.validator.js
+import { z } from 'zod';
+
+export const advisoryInputSchema = z.object({
+  crop_name: z.string().min(2, "Crop name is required"),
+  growth_stage: z.enum(['Sowing/Germination', 'Vegetative', 'Flowering', 'Fruiting/Grain Filling', 'Harvesting']),
+  soil_type: z.enum(['Clay', 'Loamy', 'Sandy', 'Alluvial', 'Black', 'Red/Laterite']),
+  field_area_acres: z.number().positive("Field area must be greater than 0"),
+  nitrogen_level: z.number().nonnegative().optional(),
+  phosphorus_level: z.number().nonnegative().optional(),
+  potassium_level: z.number().nonnegative().optional(),
+  ph_level: z.number().min(1).max(14).optional(),
+  irrigation_method: z.enum(['Rainfed', 'Drip Irrigation', 'Sprinkler', 'Flood/Furrow']),
+  language: z.string().default('en')
+});
+17. Frontend Components ListNavbar: Navigation, language selector dropdown, user profile menu.DiagnosisDropzone: Drag-and-drop file upload component with camera support and preview.DiagnosisResultCard: Interactive diagnosis report with expandable treatment tabs (Organic vs. Chemical).AdvisoryFormWizard: Step-by-step wizard for user input (Crop Info $\rightarrow$ Soil Info $\rightarrow$ Irrigation Info).FertilizerScheduleTable: Formatted grid showing dosage timeline per acre.ChatWindow: Streaming conversational interface with voice input button and markdown parsing.SoilNutrientGauge: Visual gauge chart representing current vs optimal N-P-K levels.WeatherAlertBanner: Dynamic weather callout warning against imminent rain/frost during chemical spraying.18. Security RequirementsAll Gemini API calls must pass through Node.js Express backend.Use helmet for security headers and cors limited to frontend domain.Auth middleware must verify JWT headers using Supabase Secret / Public Key.File uploads strictly validated for image MIME types (image/jpeg, image/png, image/webp) with maximum file size 10MB.Sanitize all inputs using Zod prior to passing into AI prompts to prevent Prompt Injection.19. Environment Variables TemplateBackend (server/.env)Code snippetPORT=5000
+NODE_ENV=development
+GEMINI_API_KEY=your_gemini_api_key_here
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+CLIENT_ORIGIN=http://localhost:5173
+Frontend (client/.env)Code snippetVITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_API_BASE_URL=http://localhost:5000/api/v1
+20. Suggested Folder StructurePlaintextagriwise-ai/
+├── client/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   ├── diagnosis/
+│   │   │   ├── advisory/
+│   │   │   ├── chat/
+│   │   │   └── dashboard/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── utils/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── index.html
+│   ├── tailwind.config.js
+│   └── package.json
+└── server/
+    ├── config/
+    │   ├── gemini.js
+    │   └── supabase.js
+    ├── controllers/
+    │   ├── diagnosis.controller.js
+    │   ├── advisory.controller.js
+    │   └── chat.controller.js
+    ├── middleware/
+    │   ├── auth.middleware.js
+    │   ├── error.middleware.js
+    │   └── upload.middleware.js
+    ├── routes/
+    │   ├── diagnosis.routes.js
+    │   ├── advisory.routes.js
+    │   └── chat.routes.js
+    ├── services/
+    │   ├── ai.service.js
+    │   └── weather.service.js
+    ├── validators/
+    ├── index.js
+    └── package.json
+21. Implementation PhasesPhase 1: Setup & Database
+  ├── Initialize Express & Vite React Projects
+  ├── Configure Supabase Schema & Apply RLS Rules
+  └── Setup Authentication Provider Context in Frontend
+
+Phase 2: AI Diagnostic Engine
+  ├── Multer File Processing Pipeline
+  ├── Gemini 2.5 Flash Vision Integration
+  └── Frontend Upload & Diagnostic Card UI
+
+Phase 3: Advisory & Soil Calculation Engine
+  ├── Form Wizard Implementation
+  ├── Gemini Structured Output Generation
+  └── Detailed Advisory Dashboard & PDF Generator
+
+Phase 4: Conversational Agronomist Chat
+  ├── Chat Session DB Persistence
+  ├── Streaming Response Setup (SSE)
+  └── Voice Input & Multi-Language Toggle
+
+Phase 5: Polish, Test & Deploy
+  ├── Security Hardening (Cors, Rate Limiting, Zod)
+  └── Production Build & End-to-End Verification
+22. Acceptance CriteriaDiagnosis: Uploading a diseased crop image must return a structured result with crop name, disease, severity, and treatments within 4 seconds.Advisory: Generating an advisory must output a multi-stage fertilizer and irrigation schedule tailored to field acreage and growth stage.Data Security: Non-authenticated requests to /api/v1/* endpoints must be rejected with 401 Unauthorized. Users must only see their own saved records.Resilience: Invalid input parameters must return 400 Bad Request with descriptive Zod error formatted messages.Localization: Requesting advisory in Hindi/Spanish must yield all AI generated text in the selected target language.23. Final Instruction to Coding AgentExecute this Master Prompt now.Scaffold both client and server folders according to the directory layout.Create the package files with all required dependencies (@google/genai, @supabase/supabase-js, express, zod, lucide-react, tailwindcss, etc.).Provide complete, fully typed implementation files for all controllers, routes, schemas, and React components without skipping code or using placeholders.Ensure error handling and loading states are present on every UI page and API route.

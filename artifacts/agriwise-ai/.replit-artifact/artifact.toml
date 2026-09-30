@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "AgriWise AI"
+description = "A practical crop-care assistant for farmers and agronomists to review crop health, build field advisories, calculate nutrient applications, and track farm actions."
+version = "1.0.0"
+id = "artifacts/agriwise-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23709
+
+[services.development]
+run = "pnpm --filter @workspace/agriwise-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/agriwise-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/agriwise-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23709"
+BASE_PATH = "/"
