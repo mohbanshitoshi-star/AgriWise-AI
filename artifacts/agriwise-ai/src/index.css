@@ -1,4 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+@layer theme, base, clerk, components, utilities;
 @import 'tailwindcss';
+@import '@clerk/themes/shadcn.css';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 
@@ -78,72 +81,44 @@
   --elevate-1: rgba(0, 0, 0, 0.03);
   --elevate-2: rgba(0, 0, 0, 0.08);
 
-  --background: red; /*replace with H S L */
-
-  --foreground: red; /*replace with H S L */
-
-  --border: red; /*replace with H S L */
-
-  --card: red; /*replace with H S L */
-
-  --card-foreground: red; /*replace with H S L */
-
-  --card-border: red; /*replace with H S L */
-
-  --sidebar: red; /*replace with H S L */
-
-  --sidebar-foreground: red; /*replace with H S L */
-
-  --sidebar-border: red; /*replace with H S L */
-
-  --sidebar-primary: red; /*replace with H S L */
-
-  --sidebar-primary-foreground: red; /*replace with H S L */
-
-  --sidebar-accent: red; /*replace with H S L */
-
-  --sidebar-accent-foreground: red; /*replace with H S L */
-
-  --sidebar-ring: red; /*replace with H S L */
-
-  --popover: red; /*replace with H S L */
-
-  --popover-foreground: red; /*replace with H S L */
-
-  --popover-border: red; /*replace with H S L */
-
-  --primary: red; /*replace with H S L */
-
-  --primary-foreground: red; /*replace with H S L */
-
-  --secondary: red; /*replace with H S L */
-
-  --secondary-foreground: red; /*replace with H S L */
-
-  --muted: red; /*replace with H S L */
-
-  --muted-foreground: red; /*replace with H S L */
-
-  --accent: red; /*replace with H S L */
-
-  --accent-foreground: red; /*replace with H S L */
-
-  --destructive: red; /*replace with H S L */
-
-  --destructive-foreground: red; /*replace with H S L */
-
-  --input: red; /*replace with H S L */
-  --ring: red; /*replace with H S L */
-  --chart-1: red; /*replace with H S L */
-  --chart-2: red; /*replace with H S L */
-  --chart-3: red; /*replace with H S L */
-  --chart-4: red; /*replace with H S L */
-  --chart-5: red; /*replace with H S L */
-
-  --app-font-sans: 'Inter', sans-serif;
-  --app-font-serif: Georgia, serif;
-  --app-font-mono: Menlo, monospace;
-  --radius: 0.5rem; /* 8px */
+  --background: 46 39% 95%;
+  --foreground: 164 29% 15%;
+  --border: 43 19% 85%;
+  --card: 45 43% 98%;
+  --card-foreground: 164 29% 15%;
+  --card-border: 43 19% 85%;
+  --sidebar: 164 28% 16%;
+  --sidebar-foreground: 46 35% 93%;
+  --sidebar-border: 164 18% 25%;
+  --sidebar-primary: 71 48% 63%;
+  --sidebar-primary-foreground: 164 35% 14%;
+  --sidebar-accent: 164 22% 23%;
+  --sidebar-accent-foreground: 46 35% 93%;
+  --sidebar-ring: 71 48% 63%;
+  --popover: 45 43% 98%;
+  --popover-foreground: 164 29% 15%;
+  --popover-border: 43 19% 85%;
+  --primary: 164 34% 24%;
+  --primary-foreground: 46 39% 96%;
+  --secondary: 47 36% 88%;
+  --secondary-foreground: 164 29% 18%;
+  --muted: 44 25% 90%;
+  --muted-foreground: 164 10% 42%;
+  --accent: 72 45% 67%;
+  --accent-foreground: 164 35% 14%;
+  --destructive: 5 62% 47%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 43 19% 80%;
+  --ring: 164 34% 24%;
+  --chart-1: 164 34% 24%;
+  --chart-2: 72 45% 50%;
+  --chart-3: 29 59% 58%;
+  --chart-4: 193 29% 53%;
+  --chart-5: 5 62% 57%;
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-serif: 'Manrope', sans-serif;
+  --app-font-mono: 'Space Mono', monospace;
+  --radius: 0.9rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0); /*replace with H S L */
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0); /*replace with H S L */
   --shadow-sm:
@@ -227,68 +202,40 @@
   --elevate-1: rgba(255, 255, 255, 0.04);
   --elevate-2: rgba(255, 255, 255, 0.09);
 
-  --background: red; /*replace with H S L */
-
-  --foreground: red; /*replace with H S L */
-
-  --border: red; /*replace with H S L */
-
-  --card: red; /*replace with H S L */
-
-  --card-foreground: red; /*replace with H S L */
-
-  --card-border: red; /*replace with H S L */
-
-  --sidebar: red; /*replace with H S L */
-
-  --sidebar-foreground: red; /*replace with H S L */
-
-  --sidebar-border: red; /*replace with H S L */
-
-  --sidebar-primary: red; /*replace with H S L */
-
-  --sidebar-primary-foreground: red; /*replace with H S L */
-
-  --sidebar-accent: red; /*replace with H S L */
-
-  --sidebar-accent-foreground: red; /*replace with H S L */
-
-  --sidebar-ring: red; /*replace with H S L */
-
-  --popover: red; /*replace with H S L */
-
-  --popover-foreground: red; /*replace with H S L */
-
-  --popover-border: red; /*replace with H S L */
-
-  --primary: red; /*replace with H S L */
-
-  --primary-foreground: red; /*replace with H S L */
-
-  --secondary: red; /*replace with H S L */
-
-  --secondary-foreground: red; /*replace with H S L */
-
-  --muted: red; /*replace with H S L */
-
-  --muted-foreground: red; /*replace with H S L */
-
-  --accent: red; /*replace with H S L */
-
-  --accent-foreground: red; /*replace with H S L */
-
-  --destructive: red; /*replace with H S L */
-
-  --destructive-foreground: red; /*replace with H S L */
-
-  /* Used as the border around inputs. Dark mode: Should be a border that is light enough to have high contrast when rendered on a --card background. More contrast than standard --border */
-  --input: red; /*replace with H S L */
-  --ring: red; /*replace with H S L */
-  --chart-1: red; /*replace with H S L */
-  --chart-2: red; /*replace with H S L */
-  --chart-3: red; /*replace with H S L */
-  --chart-4: red; /*replace with H S L */
-  --chart-5: red; /*replace with H S L */
+  --background: 164 24% 11%;
+  --foreground: 45 35% 92%;
+  --border: 164 15% 26%;
+  --card: 164 22% 15%;
+  --card-foreground: 45 35% 92%;
+  --card-border: 164 15% 26%;
+  --sidebar: 164 28% 9%;
+  --sidebar-foreground: 46 35% 93%;
+  --sidebar-border: 164 18% 20%;
+  --sidebar-primary: 71 48% 63%;
+  --sidebar-primary-foreground: 164 35% 14%;
+  --sidebar-accent: 164 22% 18%;
+  --sidebar-accent-foreground: 46 35% 93%;
+  --sidebar-ring: 71 48% 63%;
+  --popover: 164 22% 15%;
+  --popover-foreground: 45 35% 92%;
+  --popover-border: 164 15% 26%;
+  --primary: 71 48% 63%;
+  --primary-foreground: 164 35% 14%;
+  --secondary: 164 18% 22%;
+  --secondary-foreground: 45 35% 92%;
+  --muted: 164 18% 20%;
+  --muted-foreground: 45 12% 67%;
+  --accent: 71 48% 63%;
+  --accent-foreground: 164 35% 14%;
+  --destructive: 5 62% 57%;
+  --destructive-foreground: 0 0% 100%;
+  --input: 164 15% 29%;
+  --ring: 71 48% 63%;
+  --chart-1: 71 48% 63%;
+  --chart-2: 164 34% 48%;
+  --chart-3: 29 59% 58%;
+  --chart-4: 193 29% 53%;
+  --chart-5: 5 62% 57%;
 
   --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
   --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0);
@@ -317,7 +264,41 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    min-width: 320px;
+    font-family: var(--app-font-sans);
+    font-feature-settings: "ss01" on;
   }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-rise { animation: rise-in .55s cubic-bezier(.2,.7,.2,1) both; }
+.delay-1 { animation-delay: .08s; }
+.delay-2 { animation-delay: .16s; }
+.delay-3 { animation-delay: .24s; }
+.delay-4 { animation-delay: .32s; }
+.display-font { font-family: var(--app-font-serif); }
+.mono-font { font-family: var(--app-font-mono); }
+.paper-texture::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  opacity: .11;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.88' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+.field-contour {
+  background-image: repeating-linear-gradient(148deg, transparent 0 29px, rgba(231,236,198,.11) 30px, transparent 31px 55px);
+}
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid hsl(var(--chart-2) / .65);
+  outline-offset: 3px;
 }
 
 /**

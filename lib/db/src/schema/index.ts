@@ -1,4 +1,9 @@
 // Export your models here. Add one export per file
+export * from "./profiles";
+export * from "./diagnoses";
+export * from "./advisories";
+export * from "./conversations";
+export * from "./messages";
 // export * from "./posts";
 //
 // Each model/table should ideally be split into different files.

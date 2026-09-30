@@ -10,6 +10,20 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: dashboard
+    description: Farm overview and recent activity
+  - name: profile
+    description: User farm profile
+  - name: diagnosis
+    description: Crop health diagnostics
+  - name: advisory
+    description: Field-level crop advisories
+  - name: soil
+    description: Soil nutrient calculations
+  - name: weather
+    description: Local weather and crop risk
+  - name: gemini
+    description: Agronomy chat
 paths:
   /healthz:
     get:
@@ -24,6 +38,350 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get farm overview
+      responses:
+        "200":
+          description: Dashboard overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the signed-in user's farm profile
+      responses:
+        "200":
+          description: Farm profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    put:
+      operationId: upsertProfile
+      tags: [profile]
+      summary: Create or update the signed-in user's farm profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Saved farm profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+  /diagnoses:
+    get:
+      operationId: listDiagnoses
+      tags: [diagnosis]
+      summary: List recent crop diagnoses
+      responses:
+        "200":
+          description: User's diagnoses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Diagnosis"
+  /diagnoses/analyze:
+    post:
+      operationId: analyzeDiagnosis
+      tags: [diagnosis]
+      summary: Analyze an uploaded crop photo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/DiagnosisInput"
+      responses:
+        "201":
+          description: Saved diagnosis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Diagnosis"
+  /diagnoses/{id}:
+    get:
+      operationId: getDiagnosis
+      tags: [diagnosis]
+      summary: Get a diagnosis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Diagnosis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Diagnosis"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteDiagnosis
+      tags: [diagnosis]
+      summary: Delete a diagnosis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+  /advisories:
+    get:
+      operationId: listAdvisories
+      tags: [advisory]
+      summary: List recent field advisories
+      responses:
+        "200":
+          description: User's advisories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Advisory"
+    post:
+      operationId: generateAdvisory
+      tags: [advisory]
+      summary: Generate and save a field advisory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdvisoryInput"
+      responses:
+        "201":
+          description: Saved crop advisory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Advisory"
+  /advisories/{id}:
+    get:
+      operationId: getAdvisory
+      tags: [advisory]
+      summary: Get a saved crop advisory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Advisory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Advisory"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteAdvisory
+      tags: [advisory]
+      summary: Delete an advisory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+  /soil/calculate:
+    post:
+      operationId: calculateSoil
+      tags: [soil]
+      summary: Calculate nutrient requirements from a soil test
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SoilCalculationInput"
+      responses:
+        "200":
+          description: Nutrient application estimate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SoilCalculation"
+  /weather/forecast:
+    get:
+      operationId: getWeatherForecast
+      tags: [weather]
+      summary: Get local forecast and agricultural risk flags
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: -90
+            maximum: 90
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            minimum: -180
+            maximum: 180
+      responses:
+        "200":
+          description: Current weather and five-day forecast
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeatherForecast"
+  /gemini/conversations:
+    get:
+      operationId: listGeminiConversations
+      tags: [gemini]
+      summary: List agronomy chat sessions
+      responses:
+        "200":
+          description: Recent conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeminiConversation"
+    post:
+      operationId: createGeminiConversation
+      tags: [gemini]
+      summary: Create an agronomy chat session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeminiConversationInput"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiConversation"
+  /gemini/conversations/{id}:
+    get:
+      operationId: getGeminiConversation
+      tags: [gemini]
+      summary: Get a chat session with its messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Conversation and messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteGeminiConversation
+      tags: [gemini]
+      summary: Delete a chat session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+  /gemini/conversations/{id}/messages:
+    get:
+      operationId: listGeminiMessages
+      tags: [gemini]
+      summary: List messages in a chat session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeminiMessage"
+    post:
+      operationId: sendGeminiMessage
+      tags: [gemini]
+      summary: Send a message and receive a streamed answer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GeminiMessageInput"
+      responses:
+        "200":
+          description: SSE stream of assistant response chunks
+          content:
+            text/event-stream: {}
 components:
   schemas:
     HealthStatus:
@@ -33,4 +391,241 @@ components:
           type: string
       required:
         - status
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    ActivityItem:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [diagnosis, advisory] }
+        title: { type: string }
+        description: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, kind, title, description, createdAt]
+    DashboardSummary:
+      type: object
+      properties:
+        diagnosesCount: { type: integer }
+        advisoriesCount: { type: integer }
+        highRiskCount: { type: integer }
+        farmSizeAcres: { type: ["number", "null"] }
+        locationName: { type: ["string", "null"] }
+        primaryCrops:
+          type: array
+          items: { type: string }
+        recentActivity:
+          type: array
+          items: { $ref: "#/components/schemas/ActivityItem" }
+      required: [diagnosesCount, advisoriesCount, highRiskCount, farmSizeAcres, locationName, primaryCrops, recentActivity]
+    UserProfile:
+      type: object
+      properties:
+        userId: { type: string }
+        fullName: { type: string }
+        phoneNumber: { type: ["string", "null"] }
+        preferredLanguage: { type: string }
+        locationName: { type: ["string", "null"] }
+        latitude: { type: ["number", "null"] }
+        longitude: { type: ["number", "null"] }
+        farmSizeAcres: { type: ["number", "null"] }
+        defaultSoilType: { type: ["string", "null"] }
+        primaryCrops:
+          type: array
+          items: { type: string }
+        role: { type: string, enum: [farmer, agronomist, admin] }
+        updatedAt: { type: string, format: date-time }
+      required: [userId, fullName, phoneNumber, preferredLanguage, locationName, latitude, longitude, farmSizeAcres, defaultSoilType, primaryCrops, role, updatedAt]
+    ProfileInput:
+      type: object
+      properties:
+        fullName: { type: string, minLength: 2, maxLength: 120 }
+        phoneNumber: { type: ["string", "null"], maxLength: 40 }
+        preferredLanguage: { type: string, enum: [en, hi, es, fr, bn, pa, mr, ta, te] }
+        locationName: { type: ["string", "null"], maxLength: 160 }
+        latitude: { type: ["number", "null"], minimum: -90, maximum: 90 }
+        longitude: { type: ["number", "null"], minimum: -180, maximum: 180 }
+        farmSizeAcres: { type: ["number", "null"], minimum: 0 }
+        defaultSoilType: { type: ["string", "null"], enum: [Clay, Loamy, Sandy, Alluvial, Black, "Red/Laterite", null] }
+        primaryCrops:
+          type: array
+          items: { type: string, minLength: 2, maxLength: 80 }
+        role: { type: string, enum: [farmer, agronomist, admin] }
+      required: [fullName, preferredLanguage, primaryCrops, role]
+    DiagnosisInput:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+        cropName: { type: string, maxLength: 80 }
+        language: { type: string, enum: [en, hi, es, fr, bn, pa, mr, ta, te] }
+      required: [image, language]
+    Diagnosis:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        cropName: { type: string }
+        diseaseDetected: { type: string }
+        isHealthy: { type: boolean }
+        confidenceScore: { type: number, minimum: 0, maximum: 100 }
+        severityLevel: { type: string, enum: [Low, Moderate, High, Critical] }
+        symptoms: { type: array, items: { type: string } }
+        treatmentChemical: { type: array, items: { type: string } }
+        treatmentOrganic: { type: array, items: { type: string } }
+        preventionSteps: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+      required: [id, cropName, diseaseDetected, isHealthy, confidenceScore, severityLevel, symptoms, treatmentChemical, treatmentOrganic, preventionSteps, createdAt]
+    AdvisoryInput:
+      type: object
+      properties:
+        cropName: { type: string, minLength: 2, maxLength: 80 }
+        growthStage: { type: string, enum: ["Sowing/Germination", Vegetative, Flowering, "Fruiting/Grain Filling", Harvesting] }
+        soilType: { type: string, enum: [Clay, Loamy, Sandy, Alluvial, Black, "Red/Laterite"] }
+        fieldAreaAcres: { type: number, exclusiveMinimum: 0, maximum: 100000 }
+        nitrogenLevel: { type: ["number", "null"], minimum: 0 }
+        phosphorusLevel: { type: ["number", "null"], minimum: 0 }
+        potassiumLevel: { type: ["number", "null"], minimum: 0 }
+        phLevel: { type: ["number", "null"], minimum: 1, maximum: 14 }
+        irrigationMethod: { type: string, enum: [Rainfed, "Drip Irrigation", Sprinkler, "Flood/Furrow"] }
+        language: { type: string, enum: [en, hi, es, fr, bn, pa, mr, ta, te] }
+      required: [cropName, growthStage, soilType, fieldAreaAcres, irrigationMethod, language]
+    FertilizerStep:
+      type: object
+      properties:
+        growthStage: { type: string }
+        fertilizerName: { type: string }
+        dosagePerAcre: { type: string }
+        applicationMethod: { type: string }
+        timingNotes: { type: string }
+      required: [growthStage, fertilizerName, dosagePerAcre, applicationMethod, timingNotes]
+    IrrigationStep:
+      type: object
+      properties:
+        stage: { type: string }
+        waterFrequencyDays: { type: string }
+        criticalWarnings: { type: string }
+      required: [stage, waterFrequencyDays, criticalWarnings]
+    Advisory:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        cropName: { type: string }
+        growthStage: { type: string }
+        soilType: { type: string }
+        fieldAreaAcres: { type: number }
+        nitrogenLevel: { type: ["number", "null"] }
+        phosphorusLevel: { type: ["number", "null"] }
+        potassiumLevel: { type: ["number", "null"] }
+        phLevel: { type: ["number", "null"] }
+        irrigationMethod: { type: string }
+        fertilizerSchedule:
+          type: array
+          items: { $ref: "#/components/schemas/FertilizerStep" }
+        irrigationSchedule:
+          type: array
+          items: { $ref: "#/components/schemas/IrrigationStep" }
+        pestWarningLevel: { type: string, enum: [Low, Moderate, High, Critical] }
+        recommendedActions: { type: array, items: { type: string } }
+        yieldOptimizations: { type: array, items: { type: string } }
+        createdAt: { type: string, format: date-time }
+      required: [id, cropName, growthStage, soilType, fieldAreaAcres, nitrogenLevel, phosphorusLevel, potassiumLevel, phLevel, irrigationMethod, fertilizerSchedule, irrigationSchedule, pestWarningLevel, recommendedActions, yieldOptimizations, createdAt]
+    SoilCalculationInput:
+      type: object
+      properties:
+        cropName: { type: string, minLength: 2, maxLength: 80 }
+        areaAcres: { type: number, exclusiveMinimum: 0, maximum: 100000 }
+        nitrogenLevel: { type: number, minimum: 0 }
+        phosphorusLevel: { type: number, minimum: 0 }
+        potassiumLevel: { type: number, minimum: 0 }
+        language: { type: string, enum: [en, hi, es, fr, bn, pa, mr, ta, te] }
+      required: [cropName, areaAcres, nitrogenLevel, phosphorusLevel, potassiumLevel, language]
+    NutrientDose:
+      type: object
+      properties:
+        nutrient: { type: string }
+        soilLevel: { type: number }
+        targetKgPerAcre: { type: number }
+        deficitKgPerAcre: { type: number }
+        productName: { type: string }
+        productKgPerAcre: { type: number }
+        productKgTotal: { type: number }
+      required: [nutrient, soilLevel, targetKgPerAcre, deficitKgPerAcre, productName, productKgPerAcre, productKgTotal]
+    SoilCalculation:
+      type: object
+      properties:
+        cropName: { type: string }
+        areaAcres: { type: number }
+        assumptions: { type: array, items: { type: string } }
+        doses:
+          type: array
+          items: { $ref: "#/components/schemas/NutrientDose" }
+      required: [cropName, areaAcres, assumptions, doses]
+    ForecastDay:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        highC: { type: number }
+        lowC: { type: number }
+        precipitationProbability: { type: integer }
+        weatherCode: { type: integer }
+      required: [date, highC, lowC, precipitationProbability, weatherCode]
+    WeatherForecast:
+      type: object
+      properties:
+        latitude: { type: number }
+        longitude: { type: number }
+        timezone: { type: string }
+        currentTemperatureC: { type: number }
+        currentPrecipitationMm: { type: number }
+        windSpeedKmh: { type: number }
+        forecast:
+          type: array
+          items: { $ref: "#/components/schemas/ForecastDay" }
+        riskFlags: { type: array, items: { type: string } }
+      required: [latitude, longitude, timezone, currentTemperatureC, currentPrecipitationMm, windSpeedKmh, forecast, riskFlags]
+    GeminiConversationInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1, maxLength: 120 }
+        language: { type: string, enum: [en, hi, es, fr, bn, pa, mr, ta, te] }
+      required: [title, language]
+    GeminiConversation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        language: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, title, language, createdAt, updatedAt]
+    GeminiMessageInput:
+      type: object
+      properties:
+        content: { type: string, minLength: 1, maxLength: 6000 }
+      required: [content]
+    GeminiMessage:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        conversationId: { type: string, format: uuid }
+        role: { type: string, enum: [user, assistant] }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, conversationId, role, content, createdAt]
+    GeminiConversationWithMessages:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        language: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/GeminiMessage" }
+      required: [id, title, language, createdAt, updatedAt, messages]
 
